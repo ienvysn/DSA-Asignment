@@ -1,0 +1,2 @@
+
+The final maximum flow is the total flow we managed to push from KTM to BS. After no more paths can be found in the residual graph, that value is the answer. If we divide the graph into two groups where one side is reachable from KTM and the other is not, the total capacity of edges crossing that division will equal the maximum flow. This shows the max-flow min-cut theorem in action. In simple terms, the bottleneck edges decide the maximum possible flow.

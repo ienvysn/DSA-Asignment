@@ -1,0 +1,9 @@
+To fix this problem, we can transform the probabilities using logarithms. I learned that log of a product becomes a sum of logs. That means instead of multiplying probabilities, we can add their logs. So if we take log of each probability, the product becomes a sum.
+
+Since we want to maximize the product, we can take negative log of each probability. That way, the problem becomes minimizing a sum, which Dijkstra can handle.
+
+So we define new weight:
+
+w(e) = -log(p(e))
+
+Now the safest path becomes the shortest path using these new weights.
