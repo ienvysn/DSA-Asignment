@@ -1,57 +1,36 @@
-package Question6;
-
 import java.util.*;
-
-class Edge {
-    String to;
-    double probability;
-
-    Edge(String to, double probability) {
-        this.to = to;
-        this.probability = probability;
-    }
-}
-
-class Node implements Comparable<Node> {
-    String name;
-    double distance;
-
-    Node(String name, double distance) {
-        this.name = name;
-        this.distance = distance;
-    }
-
-    public int compareTo(Node other) {
-        return Double.compare(this.distance, other.distance);
-    }
-}
 
 public class SafestPath {
 
-    public static Map<String, Double> dijkstra(
-            Map<String, List<Edge>> graph, String source) {
+    static class Edge {
+        int to;
+        double probability;
 
-        Map<String, Double> dist = new HashMap<>();
-        PriorityQueue<Node> pq = new PriorityQueue<>();
-
-        for (String node : graph.keySet()) {
-            dist.put(node, Double.POSITIVE_INFINITY);
+        Edge(int t, double p) {
+            to = t;
+            probability = p;
         }
+    }
 
-        dist.put(source, 0.0);
-        pq.add(new Node(source, 0.0));
+    public static double[] safestPath(List<Edge>[] graph, int source) {
+        int n = graph.length;
+        double[] dist = new double[n];
+        Arrays.fill(dist, Double.MAX_VALUE);
+
+        PriorityQueue<Integer> pq = new PriorityQueue<>(
+                (a, b) -> Double.compare(dist[a], dist[b]));
+
+        dist[source] = 0;
+        pq.add(source);
 
         while (!pq.isEmpty()) {
-            Node current = pq.poll();
+            int u = pq.poll();
 
-            for (Edge edge : graph.get(current.name)) {
-
-                double weight = -Math.log(edge.probability);
-                double newDist = dist.get(current.name) + weight;
-
-                if (newDist < dist.get(edge.to)) {
-                    dist.put(edge.to, newDist);
-                    pq.add(new Node(edge.to, newDist));
+            for (Edge e : graph[u]) {
+                double weight = -Math.log(e.probability);
+                if (dist[u] + weight < dist[e.to]) {
+                    dist[e.to] = dist[u] + weight;
+                    pq.add(e.to);
                 }
             }
         }
@@ -59,34 +38,29 @@ public class SafestPath {
         return dist;
     }
 
-    public static double getOriginalProbability(double transformedDistance) {
-        return Math.exp(-transformedDistance);
-    }
-
     public static void main(String[] args) {
 
-        Map<String, List<Edge>> graph = new HashMap<>();
+        int n = 5; // 0=KTM, 1=JA, 2=JB, 3=PH, 4=BS
+        List<Edge>[] graph = new ArrayList[n];
 
-        graph.put("KTM", new ArrayList<>());
-        graph.put("JA", new ArrayList<>());
-        graph.put("JB", new ArrayList<>());
-        graph.put("PH", new ArrayList<>());
-        graph.put("BS", new ArrayList<>());
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
 
-        graph.get("KTM").add(new Edge("JA", 0.9));
-        graph.get("KTM").add(new Edge("JB", 0.8));
-        graph.get("JA").add(new Edge("PH", 0.95));
-        graph.get("JB").add(new Edge("PH", 0.85));
-        graph.get("JA").add(new Edge("BS", 0.7));
-        graph.get("JB").add(new Edge("BS", 0.9));
+        graph[0].add(new Edge(1, 0.9)); // KTM -> JA
+        graph[0].add(new Edge(2, 0.8)); // KTM -> JB
+        graph[1].add(new Edge(3, 0.95)); // JA -> PH
+        graph[2].add(new Edge(3, 0.85)); // JB -> PH
+        graph[1].add(new Edge(4, 0.7)); // JA -> BS
+        graph[2].add(new Edge(4, 0.9)); // JB -> BS
 
-        Map<String, Double> result = dijkstra(graph, "KTM");
+        double[] result = safestPath(graph, 0);
 
         System.out.println("Safest probabilities from KTM:");
 
-        for (String node : result.keySet()) {
-            double probability = getOriginalProbability(result.get(node));
-            System.out.println("To " + node + " : " + probability);
+        for (int i = 0; i < n; i++) {
+            double probability = Math.exp(-result[i]);
+            System.out.println("To node " + i + " : " + probability);
         }
     }
 }
